@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 const { articles } = require("./data/data.json");
 const port = 3000;
-console.log(articles);
+// console.log(articles);
 
 app.use(express.static("public"));
 
