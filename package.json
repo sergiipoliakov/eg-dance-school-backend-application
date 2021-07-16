@@ -4,8 +4,8 @@
 	"description": "",
 	"main": "app.js",
 	"scripts": {
-		"start": "node app.js",
-		"start:dev": "nodemon app.js"
+		"start": "node ./bin/server.js",
+		"start:dev": "nodemon ./bin/server.js"
 	},
 	"repository": {
 		"type": "git",
@@ -19,8 +19,11 @@
 	},
 	"homepage": "https://github.com/sergiipoliakov/eg-dance-school-backend-application#readme",
 	"dependencies": {
+		"cors": "2.8.5",
 		"ejs": "3.1.6",
-		"express": "4.17.1"
+		"express": "4.17.1",
+		"got": "9.6.0",
+		"morgan": "1.10.0"
 	},
 	"devDependencies": {
 		"nodemon": "2.0.7"
