@@ -2,48 +2,34 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 
-const fs = require("fs/promises");
-const path = require("path");
-
-// const { articles } = require("./data/data.json");
-
+const eventsRouter = require("./router/api/events.js");
 const app = express();
-app.use(cors());
-app.use(logger("dev"));
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
-// app.set("views", "./views");
-app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: false }));
+app.use(logger(formatsLogger));
+app.use(
+	cors({
+		origin: "*",
+		methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+		preflightContinue: false,
+		optionsSuccessStatus: 204,
+	})
+);
+app.use(express.json());
 
-app.get("/index", require("./router/api/dance-school"));
+app.use("/api/events", eventsRouter);
 
-app.get("/create-event", require("./router/api/dance-school"));
-
-app.post("/create-event", async (req, res) => {
-	await fs.writeFile(
-		path.join(__dirname, "data", "form.json"),
-
-		JSON.stringify([req.body], null, 2)
-	);
-	res.redirect("/create-event");
-});
-
-app.get("/blog", (req, res) => {
-	res.render("blog", { articles });
-});
-
-app.use((_req, res) => {
-	res.status(404).json({ message: "not found" });
+app.use((req, res) => {
+	res.status(404).json({ message: "Not found" });
 });
 
 app.use((err, req, res, next) => {
-	res.status(500).json({ message: err.messge });
+	const status = err.status || 500;
+	res.status(status).json({
+		status: status === 500 ? "fail" : "error",
+		code: status,
+		message: err.message,
+	});
 });
-
-// const port = 3000;
-
-// app.listen(port, () => {
-// 	console.log(`Example app listening at http://localhost:${port}`);
-// });
 
 module.exports = app;
