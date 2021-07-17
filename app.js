@@ -1,39 +1,35 @@
 const express = require("express");
-const fs = require("fs/promises");
-const path = require("path");
+const logger = require("morgan");
+const cors = require("cors");
+
+const eventsRouter = require("./router/api/events.js");
 const app = express();
-const { articles } = require("./data/data.json");
-const port = 3000;
-console.log(articles);
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
-app.use(express.static("public"));
+app.use(logger(formatsLogger));
+app.use(
+	cors({
+		origin: "*",
+		methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+		preflightContinue: false,
+		optionsSuccessStatus: 204,
+	})
+);
+app.use(express.json());
 
-app.set("views", "./views");
-app.set("view engine", "ejs");
+app.use("/api/events", eventsRouter);
 
-app.use(express.urlencoded({ extended: false }));
-
-app.get("/", (req, res) => {
-	res.render("index", { name: "Виталий" });
+app.use((req, res) => {
+	res.status(404).json({ message: "Not found" });
 });
 
-app.get("/create-event", (req, res) => {
-	res.render("create-event");
+app.use((err, req, res, next) => {
+	const status = err.status || 500;
+	res.status(status).json({
+		status: status === 500 ? "fail" : "error",
+		code: status,
+		message: err.message,
+	});
 });
 
-app.post("/create-event", async (req, res) => {
-	await fs.writeFile(
-		path.join(__dirname, "data", "form.json"),
-
-		JSON.stringify([req.body], null, 2)
-	);
-	res.redirect("/create-event");
-});
-
-app.get("/blog", (req, res) => {
-	res.render("blog", { articles });
-});
-
-app.listen(port, () => {
-	console.log(`Example app listening at http://localhost:${port}`);
-});
+module.exports = app;
