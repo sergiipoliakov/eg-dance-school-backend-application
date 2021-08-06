@@ -1,59 +1,35 @@
-const db = require("./db");
-const { ObjectId } = require("mongodb");
-
-const { v4: uuidv4 } = require("uuid");
-
-const getCollection = async (db, name) => {
-	const client = await db;
-	const collection = await client.db().collection(name);
-	return collection;
-};
+const Events = require("./schemas/events");
 
 const getAll = async () => {
-	const collection = await getCollection(db, "events");
-	const results = await collection.find().toArray();
+	const results = await Events.find();
 	return results;
 };
 
 const getById = async (id) => {
-	const collection = await getCollection(db, "events");
-	const objectId = new ObjectId(id);
-
-	const [result] = await collection.find({ _id: objectId }).toArray();
+	const result = await Events.findOne({ _id: id });
 	return result;
 };
 
 const remove = async (id) => {
-	const collection = await getCollection(db, "events");
-	const objectId = new ObjectId(id);
-
-	const { value: result } = await collection.findOneAndDelete({
-		_id: objectId,
-	});
+	const result = await Events.findByIdAndRemove({ _id: id });
 	return result;
 };
 
 const create = async (body) => {
-	const record = {
-		...body,
-		...(body.date ? {} : { date: new Date() }),
-	};
-	const collection = await getCollection(db, "events");
-	const result = await collection.insertOne(record);
-	return result;
+	try {
+		const result = await Events.create(body);
+		return result;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 const update = async (id, body) => {
-	const collection = await getCollection(db, "events");
-	const objectId = new ObjectId(id);
-
-	const { value: result } = await collection.findOneAndUpdate(
-		{
-			_id: objectId,
-		},
-		{ $set: body }
+	const result = await Events.findByIdAndUpdate(
+		{ _id: id },
+		{ ...body },
+		{ new: true }
 	);
-
 	return result;
 };
 
