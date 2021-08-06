@@ -1,5 +1,8 @@
 const app = require("../app");
+
 const db = require("../model/db");
+console.log("🚀 ~ file: server.js ~ line 4 ~ db", db);
+//eqweqwe
 
 const PORT = process.env.PORT || 3000;
 
