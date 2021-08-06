@@ -1,35 +1,36 @@
-const db = require("./db");
-
-const { v4: uuidv4 } = require("uuid");
+const Events = require("./schemas/events");
 
 const getAll = async () => {
-	return db.get("events").value();
+	const results = await Events.find();
+	return results;
 };
 
 const getById = async (id) => {
-	return db.get("events").find({ id }).value();
+	const result = await Events.findOne({ _id: id });
+	return result;
 };
 
 const remove = async (id) => {
-	const [record] = db.get("events").remove({ id }).write();
-	return record;
+	const result = await Events.findByIdAndRemove({ _id: id });
+	return result;
 };
 
 const create = async (body) => {
-	const id = uuidv4();
-	const record = {
-		id,
-		...body,
-		...(body.date ? {} : { date: new Date() }),
-	};
-	db.get("events").push(record).write();
-	return record;
+	try {
+		const result = await Events.create(body);
+		return result;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 const update = async (id, body) => {
-	const record = db.get("events").find({ id }).assign(body).value();
-	db.write();
-	return record.id ? record : null;
+	const result = await Events.findByIdAndUpdate(
+		{ _id: id },
+		{ ...body },
+		{ new: true }
+	);
+	return result;
 };
 
 module.exports = { getAll, getById, remove, create, update };
